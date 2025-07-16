@@ -1,22 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Fake Proxy Setup</title>
+  <title>Fake Proxy & MAC Spoofer</title>
   <style>
     body {
       background-color: #000;
       color: #0f0;
       font-family: monospace;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    #proxy {
-      font-size: 24px;
-      margin-bottom: 10px;
+
+    .container {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 50px;
+      margin-top: 30px;
     }
-    #countdown {
+
+    .box {
+      background-color: #111;
+      padding: 20px;
+      border: 1px solid #0f0;
+      border-radius: 10px;
+      width: 300px;
+      min-height: 200px;
+    }
+
+    h2 {
+      color: #00ff00;
+      font-size: 20px;
+    }
+
+    .output {
       font-size: 18px;
+      margin: 10px 0;
+    }
+
+    .countdown {
       color: #fff;
     }
+
     button {
       background: #222;
       border: 1px solid #0f0;
@@ -24,15 +52,33 @@
       padding: 10px;
       font-size: 16px;
       cursor: pointer;
-      margin-top: 20px;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>Fake Proxy Setup</h1>
-  <div id="proxy">Press start to generate</div>
-  <div id="countdown"></div>
-  <button onclick="startProxies()">Set up proxies</button>
+
+  <h1>Fake Proxy Setup & MAC Spoofer</h1>
+
+  <div class="container">
+
+    <!-- Proxy Box -->
+    <div class="box">
+      <h2>Fake Proxy Setup</h2>
+      <div class="output" id="proxy">Press start to generate</div>
+      <div class="countdown" id="proxy-countdown"></div>
+      <button onclick="startProxies()">Set up proxies</button>
+    </div>
+
+    <!-- MAC Spoofer Box -->
+    <div class="box">
+      <h2>Fake MAC Spoofer</h2>
+      <div class="output" id="mac">Press start to spoof</div>
+      <div class="countdown" id="mac-countdown"></div>
+      <button onclick="startMAC()">Spoof device</button>
+    </div>
+
+  </div>
 
   <script>
     const proxies = [
@@ -46,29 +92,70 @@
       "60.112.44.21:9999"
     ];
 
+    const colors = [
+      "#FF5555", "#55FF55", "#FFFF55", "#5555FF",
+      "#FF55FF", "#55FFFF", "#FFFFFF"
+    ];
+
+    function randomColor() {
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
     function randomProxy() {
       return proxies[Math.floor(Math.random() * proxies.length)];
     }
 
-    function startProxies() {
-      generateProxy();
+    function randomMAC() {
+      const hex = "0123456789ABCDEF";
+      let mac = "";
+      for (let i = 0; i < 6; i++) {
+        mac += hex[Math.floor(Math.random() * 16)];
+        mac += hex[Math.floor(Math.random() * 16)];
+        if (i < 5) mac += ":";
+      }
+      return mac;
     }
 
-    function generateProxy() {
-      const proxyDisplay = document.getElementById("proxy");
-      const countdownDisplay = document.getElementById("countdown");
+    function startProxies() {
+      updateProxy();
+    }
 
+    function startMAC() {
+      updateMAC();
+    }
+
+    function updateProxy() {
+      const output = document.getElementById("proxy");
+      const countdown = document.getElementById("proxy-countdown");
       let seconds = 5;
-      proxyDisplay.textContent = randomProxy();
+      output.style.color = randomColor();
+      output.textContent = randomProxy();
 
-      const countdown = setInterval(() => {
-        countdownDisplay.textContent = `Next in ${seconds--} sec`;
+      const interval = setInterval(() => {
+        countdown.textContent = `Next in ${seconds--} sec`;
         if (seconds < 0) {
-          clearInterval(countdown);
-          generateProxy();
+          clearInterval(interval);
+          updateProxy();
+        }
+      }, 1000);
+    }
+
+    function updateMAC() {
+      const output = document.getElementById("mac");
+      const countdown = document.getElementById("mac-countdown");
+      let seconds = 5;
+      output.style.color = randomColor();
+      output.textContent = randomMAC();
+
+      const interval = setInterval(() => {
+        countdown.textContent = `Next in ${seconds--} sec`;
+        if (seconds < 0) {
+          clearInterval(interval);
+          updateMAC();
         }
       }, 1000);
     }
   </script>
+
 </body>
 </html>
