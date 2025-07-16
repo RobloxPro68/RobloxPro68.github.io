@@ -1,159 +1,152 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Fake Proxy & MAC Spoofer</title>
+  <title>Server Viewer</title>
   <style>
     body {
       background-color: #000;
       color: #0f0;
       font-family: monospace;
       padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
-
-    .container {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 50px;
-      margin-top: 30px;
-    }
-
-    .box {
-      background-color: #111;
-      padding: 20px;
-      border: 1px solid #0f0;
-      border-radius: 10px;
-      width: 300px;
-      min-height: 200px;
-    }
-
-    h2 {
-      color: #00ff00;
-      font-size: 20px;
-    }
-
-    .output {
-      font-size: 18px;
-      margin: 10px 0;
-    }
-
-    .countdown {
-      color: #fff;
-    }
-
-    button {
-      background: #222;
-      border: 1px solid #0f0;
+    h1, h2 {
       color: #0f0;
-      padding: 10px;
+    }
+    input, button {
+      background: #111;
+      color: #0f0;
+      border: 1px solid #0f0;
+      padding: 8px;
       font-size: 16px;
-      cursor: pointer;
       margin-top: 10px;
+    }
+    .player {
+      border: 1px solid #0f0;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    .crash {
+      color: red;
+    }
+    #player-list {
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
 
-  <h1>Fake Proxy Setup & MAC Spoofer</h1>
+  <h1>Server Viewer</h1>
 
-  <div class="container">
+  <div id="step-1">
+    <p>Enter key:</p>
+    <input type="password" id="key-input" placeholder="Enter key...">
+    <button onclick="checkKey()">Submit</button>
+    <p id="key-error" style="color:red;"></p>
+  </div>
 
-    <!-- Proxy Box -->
-    <div class="box">
-      <h2>Fake Proxy Setup</h2>
-      <div class="output" id="proxy">Press start to generate</div>
-      <div class="countdown" id="proxy-countdown"></div>
-      <button onclick="startProxies()">Set up proxies</button>
-    </div>
+  <div id="step-2" style="display:none;">
+    <p>Enter number of people in server:</p>
+    <input type="number" id="num-input" placeholder="e.g. 5">
+    <button onclick="generatePlayers()">Generate</button>
+  </div>
 
-    <!-- MAC Spoofer Box -->
-    <div class="box">
-      <h2>Fake MAC Spoofer</h2>
-      <div class="output" id="mac">Press start to spoof</div>
-      <div class="countdown" id="mac-countdown"></div>
-      <button onclick="startMAC()">Spoof device</button>
-    </div>
+  <div id="player-list"></div>
 
+  <div id="crash-section" style="display:none;">
+    <h2>Crash Players</h2>
+    <input type="text" id="crash-input" placeholder="e.g. 1/2/3">
+    <button onclick="crashPlayers()">Crash</button>
   </div>
 
   <script>
-    const proxies = [
-      "198.51.100.23:8080",
-      "203.0.113.7:3128",
-      "192.0.2.54:8000",
-      "45.67.89.12:1080",
-      "123.456.78.90:9090",
-      "23.45.67.89:8888",
-      "150.101.1.1:443",
-      "60.112.44.21:9999"
+    const correctKey = "secret123";
+    const cities = [
+      "New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia",
+      "San Antonio", "San Diego", "Dallas", "San Jose", "Austin", "Jacksonville",
+      "San Francisco", "Indianapolis", "Columbus", "Charlotte", "Fort Worth",
+      "Detroit", "El Paso", "Seattle"
     ];
 
-    const colors = [
-      "#FF5555", "#55FF55", "#FFFF55", "#5555FF",
-      "#FF55FF", "#55FFFF", "#FFFFFF"
-    ];
+    let players = [];
 
-    function randomColor() {
-      return colors[Math.floor(Math.random() * colors.length)];
-    }
-
-    function randomProxy() {
-      return proxies[Math.floor(Math.random() * proxies.length)];
-    }
-
-    function randomMAC() {
-      const hex = "0123456789ABCDEF";
-      let mac = "";
-      for (let i = 0; i < 6; i++) {
-        mac += hex[Math.floor(Math.random() * 16)];
-        mac += hex[Math.floor(Math.random() * 16)];
-        if (i < 5) mac += ":";
+    function checkKey() {
+      const key = document.getElementById("key-input").value;
+      const error = document.getElementById("key-error");
+      if (key === correctKey) {
+        document.getElementById("step-1").style.display = "none";
+        document.getElementById("step-2").style.display = "block";
+      } else {
+        error.textContent = "Incorrect key. Access denied.";
       }
-      return mac;
     }
 
-    function startProxies() {
-      updateProxy();
+    function generateIP() {
+      return Array(4).fill().map(() => Math.floor(Math.random() * 256)).join(".");
     }
 
-    function startMAC() {
-      updateMAC();
+    function generateMAC() {
+      return Array(6).fill().map(() => {
+        let val = Math.floor(Math.random() * 256).toString(16);
+        return val.length < 2 ? "0" + val : val;
+      }).join(":");
     }
 
-    function updateProxy() {
-      const output = document.getElementById("proxy");
-      const countdown = document.getElementById("proxy-countdown");
-      let seconds = 5;
-      output.style.color = randomColor();
-      output.textContent = randomProxy();
+    function generateCity() {
+      return cities[Math.floor(Math.random() * cities.length)];
+    }
 
-      const interval = setInterval(() => {
-        countdown.textContent = `Next in ${seconds--} sec`;
-        if (seconds < 0) {
-          clearInterval(interval);
-          updateProxy();
+    function generatePlayers() {
+      const num = parseInt(document.getElementById("num-input").value);
+      if (isNaN(num) || num <= 0) return alert("Invalid number.");
+
+      players = [];
+      const container = document.getElementById("player-list");
+      container.innerHTML = "<h2>Player List</h2>";
+
+      for (let i = 1; i <= num; i++) {
+        const player = {
+          id: i,
+          ip: generateIP(),
+          mac: generateMAC(),
+          city: generateCity(),
+          crashed: false
+        };
+        players.push(player);
+        container.innerHTML += formatPlayer(player);
+      }
+
+      document.getElementById("crash-section").style.display = "block";
+    }
+
+    function formatPlayer(player) {
+      return `
+        <div class="player ${player.crashed ? 'crash' : ''}">
+          <strong>Person ${player.id}${player.crashed ? ' (CRASHED)' : ''}</strong><br>
+          IP Address: ${player.ip}<br>
+          MAC Address: ${player.mac}<br>
+          IP Information: ${player.city}, USA
+        </div>
+      `;
+    }
+
+    function crashPlayers() {
+      const input = document.getElementById("crash-input").value;
+      const ids = input.split("/").map(x => parseInt(x.trim()));
+      const container = document.getElementById("player-list");
+      container.innerHTML = "<h2>Updated Player List</h2>";
+
+      for (const id of ids) {
+        if (!isNaN(id)) {
+          const player = players.find(p => p.id === id);
+          if (player) {
+            player.crashed = true;
+          }
         }
-      }, 1000);
-    }
+      }
 
-    function updateMAC() {
-      const output = document.getElementById("mac");
-      const countdown = document.getElementById("mac-countdown");
-      let seconds = 5;
-      output.style.color = randomColor();
-      output.textContent = randomMAC();
-
-      const interval = setInterval(() => {
-        countdown.textContent = `Next in ${seconds--} sec`;
-        if (seconds < 0) {
-          clearInterval(interval);
-          updateMAC();
-        }
-      }, 1000);
+      for (const player of players) {
+        container.innerHTML += formatPlayer(player);
+      }
     }
   </script>
 
