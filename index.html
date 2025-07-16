@@ -49,7 +49,7 @@
       color: #fff;
     }
 
-    button, input {
+    button, input, select {
       background: #222;
       border: 1px solid #0f0;
       color: #0f0;
@@ -58,6 +58,10 @@
       margin-top: 10px;
       cursor: pointer;
       width: 280px;
+    }
+
+    select {
+      height: 100px;
     }
 
     input[type="number"] {
@@ -97,13 +101,20 @@
         <button onclick="startMAC()">Spoof device</button>
       </div>
 
-      <!-- Player IP/MAC Generator -->
+      <!-- Player Management -->
       <div class="box">
         <h2>How many players are in the server?</h2>
         <input type="number" id="player-count" min="1" placeholder="Enter number of players" />
         <button onclick="generatePlayerData()">Generate</button>
         <button onclick="addPlayer()">Add New Player</button>
         <div class="output" id="player-output"></div>
+      </div>
+
+      <!-- Crash Menu -->
+      <div class="box">
+        <h2>Crash Players</h2>
+        <select id="player-select" multiple></select>
+        <button onclick="crashPlayers()">Crash Selected</button>
       </div>
 
     </div>
@@ -174,6 +185,10 @@
       return Math.floor(Math.random() * 256);
     }
 
+    function randomPing() {
+      return Math.floor(Math.random() * 150) + 10; // 10ms to 160ms
+    }
+
     function startProxies() {
       updateProxy();
     }
@@ -224,7 +239,12 @@
 
       if (players.length === 0) {
         for (let i = 0; i < count; i++) {
-          players.push({ ip: randomIP(), mac: randomMAC() });
+          players.push({
+            ip: randomIP(),
+            mac: randomMAC(),
+            ping: randomPing(),
+            crashed: false
+          });
         }
       }
 
@@ -232,16 +252,40 @@
     }
 
     function addPlayer() {
-      players.push({ ip: randomIP(), mac: randomMAC() });
+      players.push({
+        ip: randomIP(),
+        mac: randomMAC(),
+        ping: randomPing(),
+        crashed: false
+      });
+      renderPlayerList();
+    }
+
+    function crashPlayers() {
+      const selected = Array.from(document.getElementById("player-select").selectedOptions).map(opt => parseInt(opt.value));
+      selected.forEach(index => {
+        players[index].crashed = true;
+      });
       renderPlayerList();
     }
 
     function renderPlayerList() {
       const output = document.getElementById("player-output");
+      const select = document.getElementById("player-select");
+
       let result = "";
+      select.innerHTML = "";
+
       players.forEach((p, i) => {
-        result += `Player ${i + 1}:\nIP: ${p.ip}\nMAC: ${p.mac}\n\n`;
+        const label = p.crashed ? `Player ${i + 1} (CRASHED)` : `Player ${i + 1}`;
+        result += `${label}:\nIP: ${p.ip}\nMAC: ${p.mac}\nPing: ${p.ping}ms\n\n`;
+
+        const option = document.createElement("option");
+        option.value = i;
+        option.textContent = label;
+        select.appendChild(option);
       });
+
       output.textContent = result.trim();
     }
   </script>
