@@ -1,16 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Server Viewer</title>
+  <title>Server Viewer & Fake Proxy/MAC Spoofer</title>
   <style>
     body {
       background-color: #000;
       color: #0f0;
       font-family: monospace;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
     }
     h1, h2 {
       color: #0f0;
+      margin-bottom: 10px;
     }
     input, button {
       background: #111;
@@ -30,6 +36,42 @@
     }
     #player-list {
       margin-top: 20px;
+      width: 320px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    /* Container for proxy and mac */
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 50px;
+      margin-top: 40px;
+      width: 100%;
+      max-width: 700px;
+    }
+    .box {
+      background-color: #111;
+      padding: 20px;
+      border: 1px solid #0f0;
+      border-radius: 10px;
+      width: 300px;
+      min-height: 200px;
+      box-sizing: border-box;
+    }
+    .output {
+      font-size: 18px;
+      margin: 10px 0;
+      min-height: 24px;
+    }
+    .countdown {
+      color: #fff;
+      min-height: 20px;
+    }
+    /* Layout for key and generate input */
+    #step-1, #step-2, #crash-section {
+      width: 320px;
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -46,7 +88,7 @@
 
   <div id="step-2" style="display:none;">
     <p>Enter number of people in server:</p>
-    <input type="number" id="num-input" placeholder="e.g. 5">
+    <input type="number" id="num-input" placeholder="e.g. 5" min="1" max="100">
     <button onclick="generatePlayers()">Generate</button>
   </div>
 
@@ -58,7 +100,29 @@
     <button onclick="crashPlayers()">Crash</button>
   </div>
 
+  <div class="container">
+
+    <!-- Proxy Box -->
+    <div class="box">
+      <h2>Fake Proxy Setup</h2>
+      <div class="output" id="proxy">Press start to generate</div>
+      <div class="countdown" id="proxy-countdown"></div>
+      <button onclick="startProxies()">Set up proxies</button>
+    </div>
+
+    <!-- MAC Spoofer Box -->
+    <div class="box">
+      <h2>Fake MAC Spoofer</h2>
+      <div class="output" id="mac">Press start to spoof</div>
+      <div class="countdown" id="mac-countdown"></div>
+      <button onclick="startMAC()">Spoof device</button>
+    </div>
+
+  </div>
+
   <script>
+    // ==== Server Viewer script ====
+
     const correctKey = "secret123";
     const cities = [
       "New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia",
@@ -75,6 +139,7 @@
       if (key === correctKey) {
         document.getElementById("step-1").style.display = "none";
         document.getElementById("step-2").style.display = "block";
+        error.textContent = "";
       } else {
         error.textContent = "Incorrect key. Access denied.";
       }
@@ -97,7 +162,10 @@
 
     function generatePlayers() {
       const num = parseInt(document.getElementById("num-input").value);
-      if (isNaN(num) || num <= 0) return alert("Invalid number.");
+      if (isNaN(num) || num <= 0) {
+        alert("Invalid number.");
+        return;
+      }
 
       players = [];
       const container = document.getElementById("player-list");
@@ -147,6 +215,92 @@
       for (const player of players) {
         container.innerHTML += formatPlayer(player);
       }
+    }
+
+    // ==== Fake Proxy & MAC Spoofer script ====
+
+    const proxies = [
+      "198.51.100.23:8080",
+      "203.0.113.7:3128",
+      "192.0.2.54:8000",
+      "45.67.89.12:1080",
+      "123.456.78.90:9090",
+      "23.45.67.89:8888",
+      "150.101.1.1:443",
+      "60.112.44.21:9999"
+    ];
+
+    const colors = [
+      "#FF5555", "#55FF55", "#FFFF55", "#5555FF",
+      "#FF55FF", "#55FFFF", "#FFFFFF"
+    ];
+
+    function randomColor() {
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    function randomProxy() {
+      return proxies[Math.floor(Math.random() * proxies.length)];
+    }
+
+    function randomMAC() {
+      const hex = "0123456789ABCDEF";
+      let mac = "";
+      for (let i = 0; i < 6; i++) {
+        mac += hex[Math.floor(Math.random() * 16)];
+        mac += hex[Math.floor(Math.random() * 16)];
+        if (i < 5) mac += ":";
+      }
+      return mac;
+    }
+
+    let proxyInterval = null;
+    let macInterval = null;
+
+    function startProxies() {
+      if (proxyInterval) clearInterval(proxyInterval);
+      updateProxy();
+    }
+
+    function startMAC() {
+      if (macInterval) clearInterval(macInterval);
+      updateMAC();
+    }
+
+    function updateProxy() {
+      const output = document.getElementById("proxy");
+      const countdown = document.getElementById("proxy-countdown");
+      let seconds = 5;
+      output.style.color = randomColor();
+      output.textContent = randomProxy();
+
+      if (proxyInterval) clearInterval(proxyInterval);
+
+      proxyInterval = setInterval(() => {
+        countdown.textContent = `Next in ${seconds--} sec`;
+        if (seconds < 0) {
+          clearInterval(proxyInterval);
+          updateProxy();
+        }
+      }, 1000);
+    }
+
+    function updateMAC() {
+      const output = document.getElementById("mac");
+      const countdown = document.getElementById("mac-countdown");
+      let seconds = 5;
+      output.style.color = randomColor();
+      output.textContent = randomMAC();
+
+      if (macInterval) clearInterval(macInterval);
+
+      macInterval = setInterval(() => {
+        countdown.textContent = `Next in ${seconds--} sec`;
+        if (seconds < 0) {
+          clearInterval(macInterval);
+          updateMAC();
+        }
+      }, 1000);
     }
   </script>
 
