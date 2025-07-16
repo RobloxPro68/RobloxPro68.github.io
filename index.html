@@ -102,6 +102,7 @@
         <h2>How many players are in the server?</h2>
         <input type="number" id="player-count" min="1" placeholder="Enter number of players" />
         <button onclick="generatePlayerData()">Generate</button>
+        <button onclick="addPlayer()">Add New Player</button>
         <div class="output" id="player-output"></div>
       </div>
 
@@ -116,6 +117,8 @@
       "4HjTfMvXzYE?LBq3cVN?",
       "7RmQzKyVoSD?PkT8aXW?"
     ];
+
+    let players = [];
 
     function checkKey() {
       const input = document.getElementById("key-input").value.trim();
@@ -219,13 +222,26 @@
         return;
       }
 
-      let result = "";
-      for (let i = 1; i <= count; i++) {
-        const ip = randomIP();
-        const mac = randomMAC();
-        result += `Player ${i}:\nIP: ${ip}\nMAC: ${mac}\n\n`;
+      if (players.length === 0) {
+        for (let i = 0; i < count; i++) {
+          players.push({ ip: randomIP(), mac: randomMAC() });
+        }
       }
 
+      renderPlayerList();
+    }
+
+    function addPlayer() {
+      players.push({ ip: randomIP(), mac: randomMAC() });
+      renderPlayerList();
+    }
+
+    function renderPlayerList() {
+      const output = document.getElementById("player-output");
+      let result = "";
+      players.forEach((p, i) => {
+        result += `Player ${i + 1}:\nIP: ${p.ip}\nMAC: ${p.mac}\n\n`;
+      });
       output.textContent = result.trim();
     }
   </script>
