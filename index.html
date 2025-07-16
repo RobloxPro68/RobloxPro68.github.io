@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fake Proxy Setup</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #0f0;
+      font-family: monospace;
+      padding: 20px;
+    }
+    #proxy {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    #countdown {
+      font-size: 18px;
+      color: #fff;
+    }
+    button {
+      background: #222;
+      border: 1px solid #0f0;
+      color: #0f0;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Fake Proxy Setup</h1>
+  <div id="proxy">Press start to generate</div>
+  <div id="countdown"></div>
+  <button onclick="startProxies()">Set up proxies</button>
+
+  <script>
+    const proxies = [
+      "198.51.100.23:8080",
+      "203.0.113.7:3128",
+      "192.0.2.54:8000",
+      "45.67.89.12:1080",
+      "123.456.78.90:9090",
+      "23.45.67.89:8888",
+      "150.101.1.1:443",
+      "60.112.44.21:9999"
+    ];
+
+    function randomProxy() {
+      return proxies[Math.floor(Math.random() * proxies.length)];
+    }
+
+    function startProxies() {
+      generateProxy();
+    }
+
+    function generateProxy() {
+      const proxyDisplay = document.getElementById("proxy");
+      const countdownDisplay = document.getElementById("countdown");
+
+      let seconds = 5;
+      proxyDisplay.textContent = randomProxy();
+
+      const countdown = setInterval(() => {
+        countdownDisplay.textContent = `Next in ${seconds--} sec`;
+        if (seconds < 0) {
+          clearInterval(countdown);
+          generateProxy();
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
