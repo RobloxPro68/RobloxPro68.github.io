@@ -40,8 +40,9 @@
     }
 
     .output {
-      font-size: 18px;
+      font-size: 16px;
       margin: 10px 0;
+      white-space: pre-line;
     }
 
     .countdown {
@@ -59,8 +60,9 @@
       width: 280px;
     }
 
-    input {
-      margin-bottom: 10px;
+    input[type="number"] {
+      width: 100%;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -95,6 +97,14 @@
         <button onclick="startMAC()">Spoof device</button>
       </div>
 
+      <!-- Player IP/MAC Generator -->
+      <div class="box">
+        <h2>How many players are in the server?</h2>
+        <input type="number" id="player-count" min="1" placeholder="Enter number of players" />
+        <button onclick="generatePlayerData()">Generate</button>
+        <div class="output" id="player-output"></div>
+      </div>
+
     </div>
   </div>
 
@@ -118,7 +128,6 @@
       }
     }
 
-    // Realistic-looking proxy list:
     const proxies = [
       "192.168.1.101:8080",
       "203.0.113.45:3128",
@@ -152,6 +161,14 @@
         if (i < 5) mac += ":";
       }
       return mac;
+    }
+
+    function randomIP() {
+      return `${randomByte()}.${randomByte()}.${randomByte()}.${randomByte()}`;
+    }
+
+    function randomByte() {
+      return Math.floor(Math.random() * 256);
     }
 
     function startProxies() {
@@ -192,6 +209,24 @@
           updateMAC();
         }
       }, 1000);
+    }
+
+    function generatePlayerData() {
+      const count = parseInt(document.getElementById("player-count").value);
+      const output = document.getElementById("player-output");
+      if (isNaN(count) || count < 1) {
+        output.textContent = "Enter a valid number.";
+        return;
+      }
+
+      let result = "";
+      for (let i = 1; i <= count; i++) {
+        const ip = randomIP();
+        const mac = randomMAC();
+        result += `Player ${i}:\nIP: ${ip}\nMAC: ${mac}\n\n`;
+      }
+
+      output.textContent = result.trim();
     }
   </script>
 
