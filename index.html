@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Key Locked Proxy & MAC Spoofer</title>
+  <title>Proxy Setup & MAC Spoofer</title>
   <style>
     body {
       background-color: #000;
@@ -19,7 +19,6 @@
 
     .container {
       display: flex;
-      flex-direction: row;
       flex-wrap: wrap;
       justify-content: center;
       gap: 50px;
@@ -49,29 +48,25 @@
       color: #fff;
     }
 
-    button {
+    button, input {
       background: #222;
       border: 1px solid #0f0;
       color: #0f0;
       padding: 10px;
       font-size: 16px;
-      cursor: pointer;
       margin-top: 10px;
+      cursor: pointer;
+      width: 280px;
     }
 
     input {
-      background: #111;
-      border: 1px solid #0f0;
-      color: #0f0;
-      padding: 8px;
-      font-size: 16px;
-      margin-top: 10px;
-      width: 300px;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
 
+  <!-- Key Lock Screen -->
   <div id="key-screen">
     <h1>Enter Access Key</h1>
     <input type="text" id="key-input" placeholder="Enter key here" />
@@ -79,19 +74,22 @@
     <div id="key-error" style="color: red; margin-top: 10px;"></div>
   </div>
 
+  <!-- Main UI -->
   <div id="main-ui" class="hidden">
-    <h1>Fake Proxy Setup & MAC Spoofer</h1>
+    <h1>Proxy Setup & MAC Spoofer</h1>
     <div class="container">
 
+      <!-- Proxy Setup -->
       <div class="box">
-        <h2>Fake Proxy Setup</h2>
+        <h2>Proxy Setup</h2>
         <div class="output" id="proxy">Press start to generate</div>
         <div class="countdown" id="proxy-countdown"></div>
         <button onclick="startProxies()">Set up proxies</button>
       </div>
 
+      <!-- MAC Spoofer -->
       <div class="box">
-        <h2>Fake MAC Spoofer</h2>
+        <h2>MAC Spoofer</h2>
         <div class="output" id="mac">Press start to spoof</div>
         <div class="countdown" id="mac-countdown"></div>
         <button onclick="startMAC()">Spoof device</button>
