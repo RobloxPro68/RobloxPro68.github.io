@@ -1,50 +1,48 @@
+
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Proxy Dashboard</title>
+  <title>Proxy Spoofer Tool</title>
   <style>
     body {
-      background-color: #111;
+      background-color: #000;
       color: #0f0;
       font-family: monospace;
       padding: 20px;
     }
     .hidden { display: none; }
-    .player { margin-bottom: 10px; }
     input, button, select {
-      background: #222;
+      background: #111;
       color: #0f0;
       border: 1px solid #0f0;
       padding: 5px;
-      margin-top: 5px;
+      margin: 4px 0;
     }
   </style>
 </head>
 <body>
-  <div id="keyScreen">
-    <h2>Enter Access Key</h2>
-    <input type="password" id="accessKey" placeholder="Enter key here">
+  <div id="keyPage">
+    <h2>Enter Key</h2>
+    <input type="password" id="keyInput" placeholder="Enter your key">
     <br><br>
-    <button onclick="checkKey()">Submit</button>
+    <button onclick="submitKey()">Submit</button>
   </div>
 
-  <div id="mainScreen" class="hidden">
-    <h2>Proxy Dashboard</h2>
+  <div id="proxyPage" class="hidden">
+    <h2>Proxy Spoofer</h2>
 
-    <button onclick="askPlayers()">How many players are in the server?</button>
+    <button onclick="askPlayerCount()">How many players are in the server?</button>
     <button onclick="addPlayer()">Add New Player</button>
+
     <div id="playerList"></div>
 
     <h3>Crash Players</h3>
-    <select id="crashSelect" multiple size="5" style="width: 300px;"></select>
-    <br>
-    <button onclick="crashSelected()">Crash Selected</button>
+    <select id="crashSelect" multiple size="6"></select>
+    <br><button onclick="crashPlayers()">Crash Selected</button>
 
-    <div style="margin-top: 20px;">
-      <button onclick="unbanUser()">Unban</button>
-      <br><br>
-      <input type="text" id="unbanInput" placeholder="Input new username here" style="padding:5px;width:200px;">
-    </div>
+    <h3>Unban User</h3>
+    <button onclick="unban()">Unban</button><br>
+    <input id="unbanInput" placeholder="Input new username here">
   </div>
 
   <script>
@@ -56,102 +54,91 @@
       "7RmQzKyVoSD?PkT8aXW?"
     ];
 
-    const players = [];
-
-    function getRandomIP() {
-      return `${rand(10,255)}.${rand(0,255)}.${rand(0,255)}.${rand(0,255)}`;
-    }
-
-    function getRandomMAC() {
-      let mac = '';
-      for (let i = 0; i < 6; i++) {
-        mac += Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
-        if (i < 5) mac += ':';
-      }
-      return mac.toUpperCase();
-    }
-
-    function getPing() {
-      return rand(30, 150) + 'ms';
-    }
+    let players = [];
 
     function rand(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    function checkKey() {
-      const key = document.getElementById('accessKey').value.trim();
-      if (validKeys.includes(key)) {
-        document.getElementById('keyScreen').classList.add('hidden');
-        document.getElementById('mainScreen').classList.remove('hidden');
+    function getFakeIP() {
+      return rand(10,255) + "." + rand(0,255) + "." + rand(0,255) + "." + rand(0,255);
+    }
+
+    function getFakeMAC() {
+      let mac = "";
+      for (let i = 0; i < 6; i++) {
+        mac += rand(0,255).toString(16).padStart(2, '0');
+        if (i < 5) mac += ":";
+      }
+      return mac.toUpperCase();
+    }
+
+    function getPing() {
+      return rand(30, 180) + "ms";
+    }
+
+    function submitKey() {
+      const k = document.getElementById("keyInput").value.trim();
+      if (validKeys.includes(k)) {
+        document.getElementById("keyPage").classList.add("hidden");
+        document.getElementById("proxyPage").classList.remove("hidden");
       } else {
-        alert("Invalid key.");
+        alert("Invalid key!");
       }
     }
 
-    function askPlayers() {
-      const count = parseInt(prompt("How many players are in the server?"));
+    function askPlayerCount() {
+      let count = parseInt(prompt("Enter number of players:"));
       if (!isNaN(count)) {
-        for (let i = players.length; i < count; i++) {
-          addPlayer();
-        }
+        while (players.length < count) addPlayer();
       }
     }
 
     function addPlayer() {
-      const ip = getRandomIP();
-      const mac = getRandomMAC();
-      const ping = getPing();
-      const name = `Player${players.length + 1}`;
-
-      const player = {
-        name,
-        ip,
-        mac,
-        ping,
+      const newPlayer = {
+        name: "Player" + (players.length + 1),
+        ip: getFakeIP(),
+        mac: getFakeMAC(),
+        ping: getPing(),
         crashed: false
       };
-
-      players.push(player);
-      renderPlayers();
+      players.push(newPlayer);
+      renderList();
     }
 
-    function renderPlayers() {
-      const list = document.getElementById('playerList');
-      const select = document.getElementById('crashSelect');
-      list.innerHTML = '';
-      select.innerHTML = '';
+    function renderList() {
+      const list = document.getElementById("playerList");
+      const crashBox = document.getElementById("crashSelect");
+      list.innerHTML = "";
+      crashBox.innerHTML = "";
 
       players.forEach((p, i) => {
-        const div = document.createElement('div');
-        div.className = 'player';
-        div.innerText = `${p.name} - IP: ${p.ip} | MAC: ${p.mac} | Ping: ${p.ping}` + (p.crashed ? ' (CRASHED)' : '');
+        const label = `${p.name} | IP: ${p.ip} | MAC: ${p.mac} | Ping: ${p.ping}` + (p.crashed ? " (CRASHED)" : "");
+        const div = document.createElement("div");
+        div.textContent = label;
         list.appendChild(div);
 
         if (!p.crashed) {
-          const option = document.createElement('option');
-          option.value = i;
-          option.innerText = p.name;
-          select.appendChild(option);
+          const opt = document.createElement("option");
+          opt.value = i;
+          opt.textContent = p.name;
+          crashBox.appendChild(opt);
         }
       });
     }
 
-    function crashSelected() {
-      const select = document.getElementById('crashSelect');
-      const selected = Array.from(select.selectedOptions).map(opt => parseInt(opt.value));
-      selected.forEach(i => {
-        players[i].crashed = true;
-      });
-      renderPlayers();
+    function crashPlayers() {
+      const select = document.getElementById("crashSelect");
+      for (let opt of select.selectedOptions) {
+        players[parseInt(opt.value)].crashed = true;
+      }
+      renderList();
     }
 
-    function unbanUser() {
-      const username = document.getElementById('unbanInput').value.trim();
-      if (username) {
-        alert(`User "${username}" has been unbanned (simulated).`);
-      } else {
-        alert("Please enter a username.");
+    function unban() {
+      const user = document.getElementById("unbanInput").value.trim();
+      if (user) {
+        alert("User "" + user + "" has been unbanned (fake).");
       }
     }
   </script>
