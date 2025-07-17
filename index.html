@@ -1,122 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Proxy Setup & MAC Spoofer</title>
+  <title>Proxy Dashboard</title>
   <style>
     body {
-      background-color: #000;
+      background-color: #111;
       color: #0f0;
       font-family: monospace;
       padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
-
-    .hidden {
-      display: none;
-    }
-
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 50px;
-      margin-top: 30px;
-    }
-
-    .box {
-      background-color: #111;
-      padding: 20px;
-      border: 1px solid #0f0;
-      border-radius: 10px;
-      width: 300px;
-      min-height: 200px;
-    }
-
-    h2 {
-      color: #00ff00;
-      font-size: 20px;
-    }
-
-    .output {
-      font-size: 16px;
-      margin: 10px 0;
-      white-space: pre-line;
-    }
-
-    .countdown {
-      color: #fff;
-    }
-
-    button, input, select {
+    .hidden { display: none; }
+    .player { margin-bottom: 10px; }
+    input, button, select {
       background: #222;
-      border: 1px solid #0f0;
       color: #0f0;
-      padding: 10px;
-      font-size: 16px;
-      margin-top: 10px;
-      cursor: pointer;
-      width: 280px;
-    }
-
-    select {
-      height: 100px;
-    }
-
-    input[type="number"] {
-      width: 100%;
-      margin-top: 10px;
+      border: 1px solid #0f0;
+      padding: 5px;
+      margin-top: 5px;
     }
   </style>
 </head>
 <body>
-
-  <!-- Key Lock Screen -->
-  <div id="key-screen">
-    <h1>Enter Access Key</h1>
-    <input type="text" id="key-input" placeholder="Enter key here" />
-    <button onclick="checkKey()">Unlock</button>
-    <div id="key-error" style="color: red; margin-top: 10px;"></div>
+  <div id="keyScreen">
+    <h2>Enter Access Key</h2>
+    <input type="password" id="accessKey" placeholder="Enter key here">
+    <br><br>
+    <button onclick="checkKey()">Submit</button>
   </div>
 
-  <!-- Main UI -->
-  <div id="main-ui" class="hidden">
-    <h1>Proxy Setup & MAC Spoofer</h1>
-    <div class="container">
+  <div id="mainScreen" class="hidden">
+    <h2>Proxy Dashboard</h2>
 
-      <!-- Proxy Setup -->
-      <div class="box">
-        <h2>Proxy Setup</h2>
-        <div class="output" id="proxy">Press start to generate</div>
-        <div class="countdown" id="proxy-countdown"></div>
-        <button onclick="startProxies()">Set up proxies</button>
-      </div>
+    <button onclick="askPlayers()">How many players are in the server?</button>
+    <button onclick="addPlayer()">Add New Player</button>
+    <div id="playerList"></div>
 
-      <!-- MAC Spoofer -->
-      <div class="box">
-        <h2>MAC Spoofer</h2>
-        <div class="output" id="mac">Press start to spoof</div>
-        <div class="countdown" id="mac-countdown"></div>
-        <button onclick="startMAC()">Spoof device</button>
-      </div>
+    <h3>Crash Players</h3>
+    <select id="crashSelect" multiple size="5" style="width: 300px;"></select>
+    <br>
+    <button onclick="crashSelected()">Crash Selected</button>
 
-      <!-- Player Management -->
-      <div class="box">
-        <h2>How many players are in the server?</h2>
-        <input type="number" id="player-count" min="1" placeholder="Enter number of players" />
-        <button onclick="generatePlayerData()">Generate</button>
-        <button onclick="addPlayer()">Add New Player</button>
-        <div class="output" id="player-output"></div>
-      </div>
-
-      <!-- Crash Menu -->
-      <div class="box">
-        <h2>Crash Players</h2>
-        <select id="player-select" multiple></select>
-        <button onclick="crashPlayers()">Crash Selected</button>
-      </div>
-
+    <div style="margin-top: 20px;">
+      <button onclick="unbanUser()">Unban</button>
+      <br><br>
+      <input type="text" id="unbanInput" placeholder="Input new username here" style="padding:5px;width:200px;">
     </div>
   </div>
 
@@ -129,166 +56,104 @@
       "7RmQzKyVoSD?PkT8aXW?"
     ];
 
-    let players = [];
+    const players = [];
+
+    function getRandomIP() {
+      return `${rand(10,255)}.${rand(0,255)}.${rand(0,255)}.${rand(0,255)}`;
+    }
+
+    function getRandomMAC() {
+      let mac = '';
+      for (let i = 0; i < 6; i++) {
+        mac += Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
+        if (i < 5) mac += ':';
+      }
+      return mac.toUpperCase();
+    }
+
+    function getPing() {
+      return rand(30, 150) + 'ms';
+    }
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
 
     function checkKey() {
-      const input = document.getElementById("key-input").value.trim();
-      const error = document.getElementById("key-error");
-      if (validKeys.includes(input)) {
-        document.getElementById("key-screen").classList.add("hidden");
-        document.getElementById("main-ui").classList.remove("hidden");
+      const key = document.getElementById('accessKey').value.trim();
+      if (validKeys.includes(key)) {
+        document.getElementById('keyScreen').classList.add('hidden');
+        document.getElementById('mainScreen').classList.remove('hidden');
       } else {
-        error.textContent = "Invalid key. Please try again.";
+        alert("Invalid key.");
       }
     }
 
-    const proxies = [
-      "192.168.1.101:8080",
-      "203.0.113.45:3128",
-      "172.16.254.1:8000",
-      "198.51.100.22:1080",
-      "10.0.0.5:9090",
-      "64.233.160.0:8888",
-      "185.199.108.153:443",
-      "216.58.212.174:9999"
-    ];
-
-    const colors = [
-      "#FF5555", "#55FF55", "#FFFF55", "#5555FF",
-      "#FF55FF", "#55FFFF", "#FFFFFF"
-    ];
-
-    function randomColor() {
-      return colors[Math.floor(Math.random() * colors.length)];
-    }
-
-    function randomProxy() {
-      return proxies[Math.floor(Math.random() * proxies.length)];
-    }
-
-    function randomMAC() {
-      const hex = "0123456789ABCDEF";
-      let mac = "";
-      for (let i = 0; i < 6; i++) {
-        mac += hex[Math.floor(Math.random() * 16)];
-        mac += hex[Math.floor(Math.random() * 16)];
-        if (i < 5) mac += ":";
-      }
-      return mac;
-    }
-
-    function randomIP() {
-      return `${randomByte()}.${randomByte()}.${randomByte()}.${randomByte()}`;
-    }
-
-    function randomByte() {
-      return Math.floor(Math.random() * 256);
-    }
-
-    function randomPing() {
-      return Math.floor(Math.random() * 150) + 10; // 10ms to 160ms
-    }
-
-    function startProxies() {
-      updateProxy();
-    }
-
-    function startMAC() {
-      updateMAC();
-    }
-
-    function updateProxy() {
-      const output = document.getElementById("proxy");
-      const countdown = document.getElementById("proxy-countdown");
-      let seconds = 5;
-      output.style.color = randomColor();
-      output.textContent = randomProxy();
-
-      const interval = setInterval(() => {
-        countdown.textContent = `Next in ${seconds--} sec`;
-        if (seconds < 0) {
-          clearInterval(interval);
-          updateProxy();
-        }
-      }, 1000);
-    }
-
-    function updateMAC() {
-      const output = document.getElementById("mac");
-      const countdown = document.getElementById("mac-countdown");
-      let seconds = 5;
-      output.style.color = randomColor();
-      output.textContent = randomMAC();
-
-      const interval = setInterval(() => {
-        countdown.textContent = `Next in ${seconds--} sec`;
-        if (seconds < 0) {
-          clearInterval(interval);
-          updateMAC();
-        }
-      }, 1000);
-    }
-
-    function generatePlayerData() {
-      const count = parseInt(document.getElementById("player-count").value);
-      const output = document.getElementById("player-output");
-      if (isNaN(count) || count < 1) {
-        output.textContent = "Enter a valid number.";
-        return;
-      }
-
-      if (players.length === 0) {
-        for (let i = 0; i < count; i++) {
-          players.push({
-            ip: randomIP(),
-            mac: randomMAC(),
-            ping: randomPing(),
-            crashed: false
-          });
+    function askPlayers() {
+      const count = parseInt(prompt("How many players are in the server?"));
+      if (!isNaN(count)) {
+        for (let i = players.length; i < count; i++) {
+          addPlayer();
         }
       }
-
-      renderPlayerList();
     }
 
     function addPlayer() {
-      players.push({
-        ip: randomIP(),
-        mac: randomMAC(),
-        ping: randomPing(),
+      const ip = getRandomIP();
+      const mac = getRandomMAC();
+      const ping = getPing();
+      const name = `Player${players.length + 1}`;
+
+      const player = {
+        name,
+        ip,
+        mac,
+        ping,
         crashed: false
-      });
-      renderPlayerList();
+      };
+
+      players.push(player);
+      renderPlayers();
     }
 
-    function crashPlayers() {
-      const selected = Array.from(document.getElementById("player-select").selectedOptions).map(opt => parseInt(opt.value));
-      selected.forEach(index => {
-        players[index].crashed = true;
-      });
-      renderPlayerList();
-    }
-
-    function renderPlayerList() {
-      const output = document.getElementById("player-output");
-      const select = document.getElementById("player-select");
-
-      let result = "";
-      select.innerHTML = "";
+    function renderPlayers() {
+      const list = document.getElementById('playerList');
+      const select = document.getElementById('crashSelect');
+      list.innerHTML = '';
+      select.innerHTML = '';
 
       players.forEach((p, i) => {
-        const label = p.crashed ? `Player ${i + 1} (CRASHED)` : `Player ${i + 1}`;
-        result += `${label}:\nIP: ${p.ip}\nMAC: ${p.mac}\nPing: ${p.ping}ms\n\n`;
+        const div = document.createElement('div');
+        div.className = 'player';
+        div.innerText = `${p.name} - IP: ${p.ip} | MAC: ${p.mac} | Ping: ${p.ping}` + (p.crashed ? ' (CRASHED)' : '');
+        list.appendChild(div);
 
-        const option = document.createElement("option");
-        option.value = i;
-        option.textContent = label;
-        select.appendChild(option);
+        if (!p.crashed) {
+          const option = document.createElement('option');
+          option.value = i;
+          option.innerText = p.name;
+          select.appendChild(option);
+        }
       });
+    }
 
-      output.textContent = result.trim();
+    function crashSelected() {
+      const select = document.getElementById('crashSelect');
+      const selected = Array.from(select.selectedOptions).map(opt => parseInt(opt.value));
+      selected.forEach(i => {
+        players[i].crashed = true;
+      });
+      renderPlayers();
+    }
+
+    function unbanUser() {
+      const username = document.getElementById('unbanInput').value.trim();
+      if (username) {
+        alert(`User "${username}" has been unbanned (simulated).`);
+      } else {
+        alert("Please enter a username.");
+      }
     }
   </script>
-
 </body>
 </html>
