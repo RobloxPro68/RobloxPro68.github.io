@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logged Addresses</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #address-list { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Logged Addresses</h1>
+    <div id="address-list">
+        <ul id="addresses"></ul>
+    </div>
+
+    <script>
+        // Function to fetch and display logged addresses
+        function fetchAddresses() {
+            fetch('/addresses')
+                .then(response => response.json())
+                .then(data => {
+                    const addresses = data.addresses;
+                    const addressesList = document.getElementById('addresses');
+                    addressesList.innerHTML = '';
+                    addresses.forEach(address => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = address;
+                        addressesList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error('Error fetching addresses:', error));
+        }
+
+        // Fetch addresses when the page loads
+        window.onload = function() {
+            fetchAddresses();
+        };
+    </script>
+</body>
+</html>
