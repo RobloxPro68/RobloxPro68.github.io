@@ -3,62 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Address Logger</title>
+    <title>Enter Key</title>
     <style>
         body { font-family: Arial, sans-serif; }
-        #address-list { display: none; }
+        #key-form { margin-top: 20px; }
     </style>
 </head>
 <body>
-    <h1>Welcome to Our Website!</h1>
-    <p>Please enjoy our content while we quietly log your address.</p>
-
-    <div id="address-list">
-        <h2>Logged Addresses</h2>
-        <ul id="addresses"></ul>
-    </div>
+    <h1>Enter Key to See Info</h1>
+    <form id="key-form">
+        <label for="key">Key:</label>
+        <input type="text" id="key" name="key" required>
+        <button type="submit">Submit</button>
+    </form>
 
     <script>
-        const key = '▀▀▀ ░▀░ ▀▀▀ ▀░░';
-
-        // Function to fetch and display logged addresses
-        function fetchAddresses() {
-            fetch('/addresses')
-                .then(response => response.json())
-                .then(data => {
-                    const addresses = data.addresses;
-                    const addressesList = document.getElementById('addresses');
-                    addressesList.innerHTML = '';
-                    addresses.forEach(address => {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = address;
-                        addressesList.appendChild(listItem);
-                    });
-                })
-                .catch(error => console.error('Error fetching addresses:', error));
-        }
-
-        // Function to log the device's address
-        function logAddress() {
-            fetch('/log-address', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ key: key })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-                fetchAddresses(); // Refresh the list of addresses
-            })
-            .catch(error => console.error('Error logging address:', error));
-        }
-
-        // Show the address list and log the address when the page loads
-        window.onload = function() {
-            document.getElementById('address-list').style.display = 'block';
-            logAddress();
+        document.getElementById('key-form').onsubmit = function(event) {
+            event.preventDefault();
+            const key = document.getElementById('key').value;
+            if (key === '▀▀▀ ░▀░ ▀▀▀ ▀░░') {
+                window.location.href = 'addresses.html';
+            } else {
+                alert('Invalid key. Please try again.');
+            }
         };
     </script>
 </body>
