@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enter Key</title>
+    <title>Address Logger</title>
     <style>
         body { font-family: Arial, sans-serif; }
-        #key-form { margin-top: 20px; }
+        #key-form, #address-list { display: none; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -17,15 +17,65 @@
         <button type="submit">Submit</button>
     </form>
 
+    <div id="address-list">
+        <h2>Logged Addresses</h2>
+        <ul id="addresses"></ul>
+    </div>
+
     <script>
+        const key = '▀▀▀ ░▀░ ▀▀▀ ▀░░';
+
+        // Function to fetch and display logged addresses
+        function fetchAddresses() {
+            fetch('/addresses?key=' + encodeURIComponent(key))
+                .then(response => response.json())
+                .then(data => {
+                    const addresses = data.addresses;
+                    const addressesList = document.getElementById('addresses');
+                    addressesList.innerHTML = '';
+                    addresses.forEach(address => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = address;
+                        addressesList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error('Error fetching addresses:', error));
+        }
+
+        // Function to log the device's address
+        function logAddress() {
+            fetch('/log-address', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ key: key })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                fetchAddresses(); // Refresh the list of addresses
+            })
+            .catch(error => console.error('Error logging address:', error));
+        }
+
+        // Show the key form and handle submission
         document.getElementById('key-form').onsubmit = function(event) {
             event.preventDefault();
-            const key = document.getElementById('key').value;
-            if (key === '▀▀▀ ░▀░ ▀▀▀ ▀░░') {
-                window.location.href = 'addresses.html';
+            const enteredKey = document.getElementById('key').value;
+            if (enteredKey === key) {
+                document.getElementById('key-form').style.display = 'none';
+                document.getElementById('address-list').style.display = 'block';
+                fetchAddresses();
+                logAddress();
             } else {
                 alert('Invalid key. Please try again.');
             }
+        };
+
+        // Initially show the key form
+        window.onload = function() {
+            document.getElementById('key-form').style.display = 'block';
         };
     </script>
 </body>
