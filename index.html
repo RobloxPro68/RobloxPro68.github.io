@@ -1,313 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Proxy Setup & MAC Spoofer</title>
-  <style>
-    body {
-      background-color: #000;
-      color: #0f0;
-      font-family: monospace;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 50px;
-      margin-top: 30px;
-    }
-
-    .box {
-      background-color: #111;
-      padding: 20px;
-      border: 1px solid #0f0;
-      border-radius: 10px;
-      width: 300px;
-      min-height: 200px;
-    }
-
-    h2 {
-      color: #00ff00;
-      font-size: 20px;
-    }
-
-    .output {
-      font-size: 16px;
-      margin: 10px 0;
-      white-space: pre-line;
-    }
-
-    .countdown {
-      color: #fff;
-    }
-
-    button, input, select {
-      background: #222;
-      border: 1px solid #0f0;
-      color: #0f0;
-      padding: 10px;
-      font-size: 16px;
-      margin-top: 10px;
-      cursor: pointer;
-      width: 280px;
-    }
-
-    select {
-      height: 100px;
-    }
-
-    input[type="number"] {
-      width: 100%;
-      margin-top: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Address Logger</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #address-list { display: none; }
+    </style>
 </head>
 <body>
+    <h1>Welcome to Our Website!</h1>
+    <p>Please enjoy our content while we quietly log your address.</p>
 
-  <!-- Key Lock Screen -->
-  <div id="key-screen">
-    <h1>Enter Access Key</h1>
-    <input type="text" id="key-input" placeholder="Enter key here" />
-    <button onclick="checkKey()">Unlock</button>
-    <div id="key-error" style="color: red; margin-top: 10px;"></div>
-  </div>
-
-  <!-- Main UI -->
-  <div id="main-ui" class="hidden">
-    <h1>Proxy Setup & MAC Spoofer</h1>
-    <div class="container">
-
-      <!-- Proxy Setup -->
-      <div class="box">
-        <h2>Proxy Setup</h2>
-        <div class="output" id="proxy">Press start to generate</div>
-        <div class="countdown" id="proxy-countdown"></div>
-        <button onclick="startProxies()">Set up proxies</button>
-      </div>
-
-      <!-- MAC Spoofer -->
-      <div class="box">
-        <h2>MAC Spoofer</h2>
-        <div class="output" id="mac">Press start to spoof</div>
-        <div class="countdown" id="mac-countdown"></div>
-        <button onclick="startMAC()">Spoof device</button>
-      </div>
-
-      <!-- Player Management -->
-      <div class="box">
-        <h2>How many players are in the server?</h2>
-        <input type="number" id="player-count" min="1" placeholder="Enter number of players" />
-        <button onclick="generatePlayerData()">Generate</button>
-        <button onclick="addPlayer()">Add New Player</button>
-        <div class="output" id="player-output"></div>
-      </div>
-
-      <!-- Crash + Unban Menu -->
-      <div class="box">
-        <h2>Crash Players</h2>
-        <select id="player-select" multiple></select>
-        <button onclick="crashPlayers()">Crash Selected</button>
-        
-        <h2 style="margin-top: 30px;">Unban</h2>
-        <input type="text" id="unban-user" placeholder="input new user" />
-        <button onclick="unbanUser()">Unban</button>
-      </div>
-
+    <div id="address-list">
+        <h2>Logged Addresses</h2>
+        <ul id="addresses"></ul>
     </div>
-  </div>
 
-  <script>
-    const validKeys = [
-      "8KdLmRpxzUQ?TfV9nEZ?",
-      "2JkLZQsoiAE?MMs4jBF?",
-      "9WxNpCvLuIB?QdK6yMT?",
-      "4HjTfMvXzYE?LBq3cVN?",
-      "7RmQzKyVoSD?PkT8aXW?"
-    ];
+    <script>
+        const key = '▀▀▀ ░▀░ ▀▀▀ ▀░░';
 
-    let players = [];
-
-    function checkKey() {
-      const input = document.getElementById("key-input").value.trim();
-      const error = document.getElementById("key-error");
-      if (validKeys.includes(input)) {
-        document.getElementById("key-screen").classList.add("hidden");
-        document.getElementById("main-ui").classList.remove("hidden");
-      } else {
-        error.textContent = "Invalid key. Please try again.";
-      }
-    }
-
-    const proxies = [
-      "192.168.1.101:8080",
-      "203.0.113.45:3128",
-      "172.16.254.1:8000",
-      "198.51.100.22:1080",
-      "10.0.0.5:9090",
-      "64.233.160.0:8888",
-      "185.199.108.153:443",
-      "216.58.212.174:9999"
-    ];
-
-    const colors = [
-      "#FF5555", "#55FF55", "#FFFF55", "#5555FF",
-      "#FF55FF", "#55FFFF", "#FFFFFF"
-    ];
-
-    function randomColor() {
-      return colors[Math.floor(Math.random() * colors.length)];
-    }
-
-    function randomProxy() {
-      return proxies[Math.floor(Math.random() * proxies.length)];
-    }
-
-    function randomMAC() {
-      const hex = "0123456789ABCDEF";
-      let mac = "";
-      for (let i = 0; i < 6; i++) {
-        mac += hex[Math.floor(Math.random() * 16)];
-        mac += hex[Math.floor(Math.random() * 16)];
-        if (i < 5) mac += ":";
-      }
-      return mac;
-    }
-
-    function randomIP() {
-      return `${randomByte()}.${randomByte()}.${randomByte()}.${randomByte()}`;
-    }
-
-    function randomByte() {
-      return Math.floor(Math.random() * 256);
-    }
-
-    function randomPing() {
-      return Math.floor(Math.random() * 150) + 10;
-    }
-
-    function startProxies() {
-      updateProxy();
-    }
-
-    function startMAC() {
-      updateMAC();
-    }
-
-    function updateProxy() {
-      const output = document.getElementById("proxy");
-      const countdown = document.getElementById("proxy-countdown");
-      let seconds = 5;
-      output.style.color = randomColor();
-      output.textContent = randomProxy();
-
-      const interval = setInterval(() => {
-        countdown.textContent = `Next in ${seconds--} sec`;
-        if (seconds < 0) {
-          clearInterval(interval);
-          updateProxy();
+        // Function to fetch and display logged addresses
+        function fetchAddresses() {
+            fetch('/addresses')
+                .then(response => response.json())
+                .then(data => {
+                    const addresses = data.addresses;
+                    const addressesList = document.getElementById('addresses');
+                    addressesList.innerHTML = '';
+                    addresses.forEach(address => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = address;
+                        addressesList.appendChild(listItem);
+                    });
+                })
+                .catch(error => console.error('Error fetching addresses:', error));
         }
-      }, 1000);
-    }
 
-    function updateMAC() {
-      const output = document.getElementById("mac");
-      const countdown = document.getElementById("mac-countdown");
-      let seconds = 5;
-      output.style.color = randomColor();
-      output.textContent = randomMAC();
-
-      const interval = setInterval(() => {
-        countdown.textContent = `Next in ${seconds--} sec`;
-        if (seconds < 0) {
-          clearInterval(interval);
-          updateMAC();
+        // Function to log the device's address
+        function logAddress() {
+            fetch('/log-address', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ key: key })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                fetchAddresses(); // Refresh the list of addresses
+            })
+            .catch(error => console.error('Error logging address:', error));
         }
-      }, 1000);
-    }
 
-    function generatePlayerData() {
-      const count = parseInt(document.getElementById("player-count").value);
-      const output = document.getElementById("player-output");
-      if (isNaN(count) || count < 1) {
-        output.textContent = "Enter a valid number.";
-        return;
-      }
-
-      if (players.length === 0) {
-        for (let i = 0; i < count; i++) {
-          players.push({
-            ip: randomIP(),
-            mac: randomMAC(),
-            ping: randomPing(),
-            crashed: false
-          });
-        }
-      }
-
-      renderPlayerList();
-    }
-
-    function addPlayer() {
-      players.push({
-        ip: randomIP(),
-        mac: randomMAC(),
-        ping: randomPing(),
-        crashed: false
-      });
-      renderPlayerList();
-    }
-
-    function crashPlayers() {
-      const selected = Array.from(document.getElementById("player-select").selectedOptions).map(opt => parseInt(opt.value));
-      selected.forEach(index => {
-        players[index].crashed = true;
-      });
-      renderPlayerList();
-    }
-
-    function renderPlayerList() {
-      const output = document.getElementById("player-output");
-      const select = document.getElementById("player-select");
-
-      let result = "";
-      select.innerHTML = "";
-
-      players.forEach((p, i) => {
-        const label = p.crashed ? `Player ${i + 1} (CRASHED)` : `Player ${i + 1}`;
-        result += `${label}:
-IP: ${p.ip}
-MAC: ${p.mac}
-Ping: ${p.ping}ms
-
-`;
-
-        const option = document.createElement("option");
-        option.value = i;
-        option.textContent = label;
-        select.appendChild(option);
-      });
-
-      output.textContent = result.trim();
-    }
-
-    function unbanUser() {
-      const username = document.getElementById("unban-user").value.trim();
-      if (username) {
-        alert(`Unbanned user: ${username}`);
-        document.getElementById("unban-user").value = "";
-      } else {
-        alert("Please enter a username to unban.");
-      }
-    }
-  </script>
-
+        // Show the address list and log the address when the page loads
+        window.onload = function() {
+            document.getElementById('address-list').style.display = 'block';
+            logAddress();
+        };
+    </script>
 </body>
 </html>
