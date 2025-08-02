@@ -3,80 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Address Logger</title>
+    <title>FakeTok</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        #key-form, #address-list { display: none; margin-top: 20px; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .profile-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+            background-color: #ddd; /* Placeholder for image */
+        }
+
+        .profile-name {
+            font-weight: bold;
+        }
+
+        .verified {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-color: #1DA1F2;
+            color: #fff;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
+        .video-post {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: 200px;
+            background-color: #eee; /* Placeholder for video thumbnail */
+            margin-bottom: 10px;
+        }
+
+        .video-description {
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
-    <h1>Enter Key to See Info</h1>
-    <form id="key-form">
-        <label for="key">Key:</label>
-        <input type="text" id="key" name="key" required>
-        <button type="submit">Submit</button>
-    </form>
+    <div class="container">
+        <div class="profile">
+            <div class="profile-image"></div>
+            <div class="profile-name">User1 <span class="verified">✓</span></div>
+        </div>
+        <div class="video-post">
+            <div class="video-thumbnail"></div>
+            <div class="video-description">This is a fake video description. #faketok #video</div>
+        </div>
 
-    <div id="address-list">
-        <h2>Logged Addresses</h2>
-        <ul id="addresses"></ul>
+        <div class="profile">
+            <div class="profile-image"></div>
+            <div class="profile-name">User2 <span class="verified">✓</span></div>
+        </div>
+        <div class="video-post">
+            <div class="video-thumbnail"></div>
+            <div class="video-description">Another fake video. Enjoy! #funny #video</div>
+        </div>
+
+        <div class="profile">
+            <div class="profile-image"></div>
+            <div class="profile-name">User3 <span class="verified">✓</span></div>
+        </div>
+        <div class="video-post">
+            <div class="video-thumbnail"></div>
+            <div class="video-description">Just pretending to be TikTok. #parody #viral</div>
+        </div>
+          <div class="profile">
+            <div class="profile-image"></div>
+            <div class="profile-name">User4 <span class="verified">✓</span></div>
+        </div>
+        <div class="video-post">
+            <div class="video-thumbnail"></div>
+            <div class="video-description">Just pretending to be TikTok. #parody #viral</div>
+        </div>
+          <div class="profile">
+            <div class="profile-image"></div>
+            <div class="profile-name">User5 <span class="verified">✓</span></div>
+        </div>
+        <div class="video-post">
+            <div class="video-thumbnail"></div>
+            <div class="video-description">Just pretending to be TikTok. #parody #viral</div>
+        </div>
     </div>
-
-    <script>
-        const key = '▀▀▀ ░▀░ ▀▀▀ ▀░░';
-
-        // Function to fetch and display logged addresses
-        function fetchAddresses() {
-            fetch('/addresses?key=' + encodeURIComponent(key))
-                .then(response => response.json())
-                .then(data => {
-                    const addresses = data.addresses;
-                    const addressesList = document.getElementById('addresses');
-                    addressesList.innerHTML = '';
-                    addresses.forEach(address => {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = address;
-                        addressesList.appendChild(listItem);
-                    });
-                })
-                .catch(error => console.error('Error fetching addresses:', error));
-        }
-
-        // Function to log the device's address
-        function logAddress() {
-            fetch('/log-address', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ key: key })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-                fetchAddresses(); // Refresh the list of addresses
-            })
-            .catch(error => console.error('Error logging address:', error));
-        }
-
-        // Show the key form and handle submission
-        document.getElementById('key-form').onsubmit = function(event) {
-            event.preventDefault();
-            const enteredKey = document.getElementById('key').value;
-            if (enteredKey === key) {
-                document.getElementById('key-form').style.display = 'none';
-                document.getElementById('address-list').style.display = 'block';
-                fetchAddresses();
-                logAddress();
-            } else {
-                alert('Invalid key. Please try again.');
-            }
-        };
-
-        // Initially show the key form
-        window.onload = function() {
-            document.getElementById('key-form').style.display = 'block';
-        };
-    </script>
 </body>
 </html>
